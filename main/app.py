@@ -108,6 +108,6 @@ def predict():
         if os.path.exists(temp_video_path):
             os.remove(temp_video_path)
 
-if __name__ == '__main__':
-    # Remember to run on a different port if 5000 is in use
-    app.run(debug=True, host='0.0.0.0', port=5001)
+# if __name__ == '__main__':
+#     # Remember to run on a different port if 5000 is in use
+#     app.run(debug=True, host='0.0.0.0', port=5001)
