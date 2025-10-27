@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import numpy as np
 import cv2  # OpenCV
 import os
+import gdown
 
 # --- 1. DEFINE YOUR PYTORCH MODEL ARCHITECTURE ---
 CLASS_NAMES = ['Playing Guitar', 'Jogging', 'Typing on Keyboard', 'Waving Hand', 'Drinking Water']
@@ -27,18 +28,35 @@ class MyVideoModel(nn.Module):
 
 # --- 2. SETUP & MODEL LOADING ---
 app = Flask(__name__)
-
-# <-- NEW: Set the maximum content length to 600 MB -->
 app.config['MAX_CONTENT_LENGTH'] = 600 * 1024 * 1024 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
+# --- NEW: Download Model from Google Drive ---
 MODEL_PATH = 'your_model.pth'
-model = MyVideoModel().to(device)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-model.eval()
-print("✅ PyTorch model loaded successfully!")
+MODEL_FILE_ID = '1ctIehUfLsoH1yk5KeMmU-b7-Xa79BMLz' # 👈 PASTE YOUR FILE ID HERE
+
+if not os.path.exists(MODEL_PATH):
+    print(f"Model file '{MODEL_PATH}' not found. Downloading...")
+    try:
+        gdown.download(id=MODEL_FILE_ID, output=MODEL_PATH, quiet=False)
+        print("✅ Model downloaded successfully!")
+    except Exception as e:
+        print(f"❌ Error downloading model: {e}")
+        # This will stop the app if the download fails
+        raise SystemExit()
+else:
+    print(f"✅ Model file '{MODEL_PATH}' already exists.")
+
+# Now, load the model as usual
+try:
+    model = MyVideoModel().to(device)
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+    model.eval()
+    print("✅ PyTorch model loaded successfully!")
+except Exception as e:
+    print(f"❌ Error loading model: {e}")
+    raise SystemExit()
 
 # --- 3. PREPROCESSING FUNCTION ---
 def preprocess_video(video_path):
